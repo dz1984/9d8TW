@@ -11,9 +11,7 @@
   padding: 0;
   margin: 0;
 }
-.pop-map {
-    height: 600px;
-}
+
 #map-canvas {
   height: 100%;
   margin: 0px;

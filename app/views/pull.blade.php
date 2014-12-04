@@ -1,30 +1,64 @@
 @extends('layouts.default')
+@section('header')
+{{ HTML::style('css/slide.css') }}
+@stop
 
 @section('content')
-<div class="row pull-block">
-    <div class="col-md-6">
-        <h3>輸入區塊</h3>
+<main class="cd-main-content">
+    <!-- your content here -->
+    <div id="map-canvas"></div>
+</main>
+  <div class="cd-panel from-right">
+    <header class="cd-panel-header">
+      <h1>輸入區</h1>
+      <button class="cd-panel-close btn">X</button>
+    </header>
 
-    </div>
-    <div class="col-md-6 pop-map">
-            <h3>Google Map</h3>
-            <div id="map-canvas"></div>
-    </div>
-</div>
+    <div class="cd-panel-container">
+      <div class="cd-panel-content">
+        
+      </div> <!-- cd-panel-content -->
+    </div> <!-- cd-panel-container -->
+  </div> <!-- cd-panel -->
+
 @stop
 
 @section('script')
 {{ HTML::script('https://maps.googleapis.com/maps/api/js?v=3.exp') }}
 <script>
-var lat = 25.0293008,
-    lng = 121.5205833,
-    map = new google.maps.Map(document.getElementById("map-canvas"), {
-      zoom: 15,
-      scrollwheel: false,
-      center: {
-        lat: lat,
-        lng: lng
-      }
-    });
+$(document).ready(function() {
+
+  var placeMarker = function(location) {
+  var marker = new google.maps.Marker({
+      position: location,
+      map: map
+  });
+
+  map.setCenter(location);
+}
+  var lat = 25.0293008,
+      lng = 121.5205833,
+      map = new google.maps.Map(document.getElementById("map-canvas"), {
+        zoom: 15,
+        scrollwheel: false,
+        center: {
+          lat: lat,
+          lng: lng
+        }
+      });
+
+      google.maps.event.addListener(map, 'click', function(event) {
+        placeMarker(event.latLng);
+        $('.cd-panel').addClass('is-visible');
+      });
+
+  //clode the lateral panel
+  $('.cd-panel').on('click', function(event){
+    if( $(event.target).is('.cd-panel') || $(event.target).is('.cd-panel-close') ) { 
+      $('.cd-panel').removeClass('is-visible');
+      event.preventDefault();
+    }
+  });
+});
 </script>
 @stop
