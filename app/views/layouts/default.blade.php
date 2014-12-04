@@ -6,9 +6,7 @@
     <title>揪地霸</title>
 </head>
 <body>
-    <div class='container'>
-      @yield('content')
-    </div>
+    @yield('content')
     @include('includes.footer')
     @include('includes.scripts')
 </body>
