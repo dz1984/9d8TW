@@ -11,7 +11,7 @@
   <div class="cd-panel from-right">
     <header class="cd-panel-header">
       <h1>輸入區</h1>
-      <button class="cd-panel-close btn">X</button>
+      <button class="cd-panel-close btn btn-default"><i class="mdi-navigation-close"></i></button>
     </header>
 
     <div class="cd-panel-container">
@@ -54,7 +54,10 @@ $(document).ready(function() {
 
   //clode the lateral panel
   $('.cd-panel').on('click', function(event){
-    if( $(event.target).is('.cd-panel') || $(event.target).is('.cd-panel-close') ) { 
+    var isClose = ['.cd-panel', '.cd-panel-close', '.mdi-navigation-close'].some(function(element){
+        return $(event.target).is(element);
+    });
+    if(isClose) { 
       $('.cd-panel').removeClass('is-visible');
       event.preventDefault();
     }
