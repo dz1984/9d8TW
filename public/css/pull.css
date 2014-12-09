@@ -1,0 +1,24 @@
+#map-canvas {
+  height: 100%;
+  margin: 0px;
+  padding: 0px;
+  width: 100%;
+}
+
+#loc-input {
+  height: 32px;
+  margin-top: 16px;
+  background-color: #fff;
+  padding: 0 11px 0 13px;
+  width: 400px;
+  font-size: 15px;
+  font-weight: 300;
+  text-overflow: ellipsis;
+}
+
+#loc-input:focus {
+  border-color: #4d90fe;
+  margin-left: -1px;
+  padding-left: 14px;  
+  width: 401px;
+}
