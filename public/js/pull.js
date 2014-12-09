@@ -40,7 +40,7 @@
 
             $.getJSON(url, function(geoJSON) {
                 if ('OK' === geoJSON.status) {
-                    // TODO : render the address
+                    // render the address
                     var addr = geoJSON.results[0].formatted_address;
                     $('.pull-whereis').text(addr);
                 }
@@ -68,15 +68,28 @@
 
         google.maps.event.addListener(map, 'click', function(event) {
             markerLocation = event.latLng;
-            // TODO : change the location to address
+            // translate the location to address
             geoLocToAddr(markerLocation);
 
-            $('.cd-panel').addClass('is-visible');
+            openPullPanel();
         });
 
-        $('.pull-save').on('click',function(event){
-            placeMarker(markerLocation);
+        var openPullPanel = function() {
+            $('.cd-panel').addClass('is-visible');
+        };
+
+        var closePullPanel = function() {
             $('.cd-panel').removeClass('is-visible');
+        };
+
+        $('.pull-save').on('click', function(event){
+            placeMarker(markerLocation);
+            closePullPanel();
+            event.preventDefault();
+        });
+
+        $('.pull-cancel').on('click', function(event){
+            closePullPanel();
             event.preventDefault();
         });
 
@@ -87,7 +100,7 @@
             });
         
             if(isClose) { 
-                $('.cd-panel').removeClass('is-visible');
+                closePullPanel();
                 event.preventDefault();
             }
         });

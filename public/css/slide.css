@@ -182,6 +182,7 @@ Main components
   overflow: auto;
   -webkit-overflow-scrolling: touch;
 }
+
 .cd-panel-content p {
   font-size: 14px;
   font-size: 0.875rem;
