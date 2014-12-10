@@ -24,7 +24,12 @@
         var placeMarker = function(location) {
             var marker = new google.maps.Marker({
               position: location,
-              map: map
+              map: map,
+              icon: {
+                url: 'images/fist-icon.png',
+                scaledSize: new google.maps.Size(20, 20),
+                origin: new google.maps.Point(0,0)
+              }
             });
 
             map.setCenter(location);
