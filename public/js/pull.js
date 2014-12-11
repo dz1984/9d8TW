@@ -51,6 +51,7 @@
                 }
             });
         };
+
         google.maps.event.addListener(searchBox, 'places_changed', function() {
             var places = searchBox.getPlaces();
 
@@ -100,11 +101,10 @@
 
         //clode the lateral panel
         $('.cd-panel').on('click', function(event){
-            var isClose = ['.cd-panel', '.cd-panel-close', '.mdi-navigation-close'].some(function(element){
-                return $(event.target).is(element);
-            });
+            var isClose = $(event.target).is('.cd-panel');
         
             if(isClose) { 
+                // TODO : ask the user whether to save changes before close it.
                 closePullPanel();
                 event.preventDefault();
             }

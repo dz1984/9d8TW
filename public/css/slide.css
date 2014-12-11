@@ -72,7 +72,6 @@ Main components
 
 .cd-panel-header {
   position: fixed;
-  width: 90%;
   height: 100px;
   background: rgba(255, 255, 255, 0.96);
   z-index: 2;
@@ -112,12 +111,6 @@ Main components
   }
 }
 
-.cd-panel-close {
-  position: absolute;
-  top: 0;
-  right: 0;
-  font-size: 16pt;
-}
 .cd-panel-container {
   position: fixed;
   width: 90%;
