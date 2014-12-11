@@ -6,7 +6,7 @@ class PullController extends BaseController {
     }
 
     public function getIndex() {
-        return View::make('pull');
+        return View::make('pull.index');
     }
     
     public function getAll() {

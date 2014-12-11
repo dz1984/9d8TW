@@ -27,7 +27,7 @@
 @stop
 
 @section('script')
-{{ HTML::script('js/jquery.parallax.min.js') }}
+{{ HTML::script('js/libs/jquery.parallax.min.js') }}
 <script>
   $(document).ready(function() {
     $('#scene').parallax();
