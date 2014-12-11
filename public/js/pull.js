@@ -49,9 +49,20 @@
 
     var placePullMarker = function(map) {
 
+        var randOp = function(a , b) {
+            var op = Math.round(Math.random()*1);
+
+            if (0 === op) {
+                return a+b;
+            }
+
+            return a-b;
+        };
+
         var generatRandLatLng = function(baseLatLng) {
-            var randLat = baseLatLng.lat + (Math.round(Math.random()*100)/10000);
-            var randLng = baseLatLng.lng + (Math.round(Math.random()*100)/10000);
+            var randLat = randOp(baseLatLng.lat, (Math.round(Math.random()*100)/10000));
+            var randLng = randOp(baseLatLng.lng, (Math.round(Math.random()*100)/10000));
+
             return {
                 lat: randLat,
                 lng: randLng
