@@ -14,19 +14,16 @@
         map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions),
         input = document.getElementById('loc-input'),
         searchBox = new google.maps.places.SearchBox(input),
-        markerLocation = null;
+        newPullMarkLoc = null;
 
-    var placeMarker = function(location, center) {
+    var placeMarker = function(id, location, center) {
         if (typeof center === 'undefined') {
             center = true;
         }
 
-        var mockPullId = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
-
         var marker = new google.maps.Marker({
           position: location,
           map: map,
-          attribution: {source: mockPullId},
           icon: {
             url: 'images/fist-icon.png',
             scaledSize: new google.maps.Size(20, 20),
@@ -35,19 +32,19 @@
         });
 
         // marker event handler
-        (function(marker) {
+        (function(marker,id) {
             google.maps.event.addListener(marker, 'click',function(){
-                // TODO : show the pull record.\
-                console.log(marker.getAttribution());
+                // TODO : show the pull record.
+                console.log(id);
             });
-        })(marker);
+        })(marker,id);
 
         if (true === center){
             map.setCenter(location);
         }
     };
 
-    var placePullMarker = function(map) {
+    var placePullMarker = function(map, bounds) {
 
         var randOp = function(a , b) {
             var op = Math.round(Math.random()*1);
@@ -68,17 +65,26 @@
                 lng: randLng
             };
         };
-        var mockPullJson = [
-            {lat: 25.0294008, lng: 121.5216733},
-            {lat: 25.0175019, lng: 121.5218866}
-        ];
 
-        mockPullJson.forEach(function(pullJson){
-            var pullJson = generatRandLatLng(pullJson);
-            var loc = new google.maps.LatLng(pullJson.lat, pullJson.lng);
-            placeMarker(loc, false);
-        });
+        $.ajax('pull/all',
+            {
+                data: {
+                    'bounds': bounds.toUrlValue()
+                },
+                dataType: 'JSON',
+                success: function(responseJson){
+                    if (responseJson.status === 'OK') {
+                        var pullList = responseJson.pulls;
 
+                        pullList.forEach(function(pull){
+                            var id = pull.id;
+                            var pullJson = generatRandLatLng(pull);
+                            var loc = new google.maps.LatLng(pullJson.lat, pullJson.lng);
+                            placeMarker(id, loc, false);
+                        });
+                } // end success
+            }
+        }); // end ajax
     };
 
     var geoLocToAddr = function(location) {
@@ -126,13 +132,13 @@
     google.maps.event.addListener(map, 'tilesloaded', function(event){    
         var bounds = map.getBounds();
         // TODO : load all pull json dataset between this bound and place marker
-        placePullMarker(map);        
+        placePullMarker(map,bounds);        
     });
 
     google.maps.event.addListener(map, 'click', function(event) {
-        markerLocation = event.latLng;
+        newPullMarkLoc = event.latLng;
         // translate the location to address
-        geoLocToAddr(markerLocation);
+        geoLocToAddr(newPullMarkLoc);
         openPullPanel();
     });
 
@@ -147,7 +153,11 @@
 
     $('.pull-save').on('click', function(event){
         event.preventDefault();
-        placeMarker(markerLocation);
+        // TODO : insert new pull record.
+
+        var mockPullId = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
+
+        placeMarker(mockPullId, newPullMarkLoc);
         closePullPanel();
     });
 
