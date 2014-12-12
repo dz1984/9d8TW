@@ -55,15 +55,16 @@
             };
 
             this._setTitle = function(addr) {
-                this._jqTitle.val(addr);
+                this._jqTitle.text(addr);
              };
 
             this._clearContent = function() {
-                $('.pull-content').val('');
+                this._jqContent.val('');
             };
 
             this._getContent = function() {
-                var content = $.trim($('.pull-content').val());
+                var content = $.trim(this._jqContent.val());
+
                 return content;
             };
 
@@ -90,10 +91,14 @@
         };
 
         PullPanel.prototype.save = function() {
+            var content = this._getContent();
+            var markerAddr = this._marker.getAddress();
             var markerLatLng = this._marker.getLatLng();
             var mockSaveData = {
-                latLng: markerLatLng.toUrlValue(),
-                content: this._getContent()
+                lat: markerLatLng.lat(),
+                lng: markerLatLng.lng(),
+                addr: markerAddr,
+                content: content
             };
 
             // TODO : insert new pull record.
@@ -116,8 +121,9 @@
             this._latLng = latLng;
             this._id = null;
             this._addr = null;
-            this._marker = null;    
-            this._clickCallback = [];        
+            this._content = null;
+            this._marker = null;   
+            this._clickCallback = [];       
         }
 
         PullMarker.prototype.addClickCallback = function(callback) {
@@ -135,6 +141,18 @@
 
         PullMarker.prototype.getId = function(id) {
             return this._id;
+        };
+
+        PullMarker.prototype.setContent = function(content) {
+            this._content = content;
+        };
+
+        PullMarker.prototype.getContent = function() {
+            return this._content;
+        };
+
+        PullMarker.prototype.setAddress = function(addr) {
+            this._addr = addr;
         };
 
         PullMarker.prototype.getAddress = function() {
@@ -176,16 +194,16 @@
             this._marker = new google.maps.Marker(markerOptions);
 
             // marker event handler
-            (function(marker,id) {
+            (function(id, marker, callbackList) {
                 google.maps.event.addListener(marker, 'click', function(event){
                     // TODO : show the pull record.
-                    this._clickCallback.forEach(function(callback){
+                    callbackList.forEach(function(callback){
                         callback(event);
                     });
 
                     console.log(id);
                 });
-            })(this._marker, this._id);
+            })(this._id, this._marker, this._clickCallback);
 
             if (true === center){
                 this._map.setCenter(this._latLng);
@@ -227,27 +245,7 @@
         };
     };
 
-    var placePullMarker = function(map, bounds) {
-
-        var randOp = function(a , b) {
-            var op = Math.round(Math.random()*1);
-
-            if (0 === op) {
-                return a+b;
-            }
-
-            return a-b;
-        };
-
-        var generatRandLatLng = function(baseLatLng) {
-            var randLat = randOp(baseLatLng.lat, (Math.round(Math.random()*100)/10000));
-            var randLng = randOp(baseLatLng.lng, (Math.round(Math.random()*100)/10000));
-
-            return {
-                lat: randLat,
-                lng: randLng
-            };
-        };
+    var placeBoundPullMarker = function(map, bounds) {
 
         $.ajax('pull/all',
             {
@@ -257,14 +255,18 @@
                 dataType: 'JSON',
                 success: function(responseJson){
                     if (responseJson.status === 'OK') {
-                        var pullList = responseJson.pulls;
+                        var pullJsonList = responseJson.pulls;
 
-                        pullList.forEach(function(pull){
-                            var id = pull.id;
-                            var pullJson = generatRandLatLng(pull);
+                        pullJsonList.forEach(function(pullJson){
+                            var id = pullJson.id;
+                            var addr = pullJson.addr;
+                            var content = pullJson.content;
                             var loc = new google.maps.LatLng(pullJson.lat, pullJson.lng);
                             var marker = new PullMarker(map, loc);
+
                             marker.setId(id);
+                            marker.setAddress(addr);
+                            marker.setContent(content);
                             marker.placeIt(false);
                         });
                 } // end success
@@ -300,7 +302,7 @@
     google.maps.event.addListener(map, 'tilesloaded', function(event){    
         var bounds = map.getBounds();
         // TODO : load all pull json dataset between this bound and place marker
-        placePullMarker(map,bounds);        
+        placeBoundPullMarker(map,bounds);        
     });
 
     google.maps.event.addListener(map, 'click', function(event) {

@@ -11,41 +11,41 @@ class PullController extends BaseController {
     
     public function getAll() {
         if (Request::ajax()){
+            $pulls = Pull::all(array('lat','lng','content'));
             $bounds = Input::get('bounds');
 
-            // TODO : findout all pull records between this bounds.
+            // findout all pull records between this bounds.
 
-            $mockPullList = array(
+            $responseJson = array(
                 'status' => 'OK',
                 'message' => $bounds,
-                'pulls' => array(
-                    array(
-                        'lat' => 25.0294008,
-                        'lng' => 121.5216733,
-                        'id' => md5(rand())
-                    ),
-                    array(
-                        'lat' => 25.0175019,
-                        'lng' => 121.5218866,
-                        'id' => md5(rand())
-                    )
-                )
+                'pulls' => $pulls->toArray()
             );
-            return Response::json($mockPullList);            
+            return Response::json($responseJson);            
         }
     }
 
     public function postAdd(){
         if (Request::ajax()){
-            $latLng = Input::get('latLng');
+            $lat = Input::get('lat');
+            $lng = Input::get('lng');
+            $addr = Input::get('addr');
             $content = Input::get('content');
             
-            // TODO : insert record.
-            $mockResponse = array(
+            $pull = new Pull;
+
+            $pull->lat = $lat;
+            $pull->lng = $lng;
+            $pull->address = $addr;
+            $pull->content = $content;
+            $pull->save();
+
+            $responseJson = array(
                 'status'    => 'OK',
-                'message'   => $latLng.';'.$content,
+                'message'   => $lat.';'.$lng.';'.$addr.';'.$content,
             );
-            return Response::json($mockResponse);
+
+            return Response::json($responseJson);
         }
     }
 }
