@@ -14,35 +14,95 @@
         map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions),
         input = document.getElementById('loc-input'),
         searchBox = new google.maps.places.SearchBox(input),
-        newPullMarkLoc = null;
+        newPullMarker = null;
 
-    var placeMarker = function(id, location, center) {
-        if (typeof center === 'undefined') {
-            center = true;
-        }
+    var getJsonSync = function(url) {
 
-        var marker = new google.maps.Marker({
-          position: location,
-          map: map,
-          icon: {
-            url: 'images/fist-icon.png',
-            scaledSize: new google.maps.Size(20, 20),
-            origin: new google.maps.Point(0,0)
-          }
+        var jqxhr = $.ajax({
+            type: 'GET',
+            url: url,
+            dataType: 'json',
+            cache: false,
+            async: false,
         });
 
-        // marker event handler
-        (function(marker,id) {
-            google.maps.event.addListener(marker, 'click',function(){
-                // TODO : show the pull record.
-                console.log(id);
-            });
-        })(marker,id);
-
-        if (true === center){
-            map.setCenter(location);
-        }
+        return {
+            valid: jqxhr.statusText,
+            data: jqxhr.responseJSON
+        };
     };
+
+    var PullMarker = (function(){
+
+        function PullMarker(map, latLng) {
+            this._map = map;
+            this._latLng = latLng;
+            this._id = null;
+            this._addr = null;
+            this._marker = null;            
+        }
+
+        PullMarker.prototype.setId = function(id) {
+            this._id = id;
+        };
+
+        PullMarker.prototype.getId = function(id) {
+            return this._id;
+        };
+
+        PullMarker.prototype.getAddress = function() {
+            if (this._addr !== null) {
+                return this._addr;
+            }
+
+            var strLocation = this._latLng.toUrlValue();
+            var param = $.param({
+                'latlng': strLocation,
+                'components': 'route'
+            });
+
+            var apiUrl = GEOCODEAPI_URL + '?' + param;
+            var reply = getJsonSync(apiUrl);
+
+            if (reply.valid == 'OK' && reply.data.status == 'OK') {
+                this._addr = reply.data.results[0].formatted_address;
+            } 
+
+            return (null === this._addr)?'不知名地方':this._addr;
+        };
+
+        PullMarker.prototype.place = function(center) {
+            if (typeof center === 'undefined') {
+                center = true;
+            }
+
+            var markerOptions = {
+              position: this._latLng,
+              map: this._map,
+              icon: {
+                url: 'images/fist-icon.png',
+                scaledSize: new google.maps.Size(20, 20),
+                origin: new google.maps.Point(0,0)
+              }
+            };
+
+            this._marker = new google.maps.Marker(markerOptions);
+
+            // marker event handler
+            (function(marker,id) {
+                google.maps.event.addListener(marker, 'click', function(){
+                    // TODO : show the pull record.
+                    console.log(id);
+                });
+            })(this._marker, this._id);
+
+            if (true === center){
+                this._map.setCenter(this._latLng);
+            }
+        };
+
+        return PullMarker;
+    })();
 
     var placePullMarker = function(map, bounds) {
 
@@ -80,28 +140,12 @@
                             var id = pull.id;
                             var pullJson = generatRandLatLng(pull);
                             var loc = new google.maps.LatLng(pullJson.lat, pullJson.lng);
-                            placeMarker(id, loc, false);
+                            var marker = new PullMarker(map, loc);
+                            marker.place(false);
                         });
                 } // end success
             }
         }); // end ajax
-    };
-
-    var geoLocToAddr = function(location) {
-        var strLocation = location.toUrlValue(),
-            param = $.param({
-                'latlng': strLocation,
-                'components': 'route'
-            }),
-            url = GEOCODEAPI_URL + '?' + param;
-
-        $.getJSON(url, function(geoJSON) {
-            if ('OK' === geoJSON.status) {
-                // render the address
-                var addr = geoJSON.results[0].formatted_address;
-                $('.pull-whereis').text(addr);
-            }
-        });
     };
 
     // setting search bar
@@ -136,9 +180,9 @@
     });
 
     google.maps.event.addListener(map, 'click', function(event) {
-        newPullMarkLoc = event.latLng;
-        // translate the location to address
-        geoLocToAddr(newPullMarkLoc);
+        newPullMarker = new PullMarker(map, event.latLng);
+        var addr = newPullMarker.getAddress();
+        $('.pull-whereis').text(addr);
         openPullPanel();
     });
 
@@ -154,10 +198,7 @@
     $('.pull-save').on('click', function(event){
         event.preventDefault();
         // TODO : insert new pull record.
-
-        var mockPullId = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
-
-        placeMarker(mockPullId, newPullMarkLoc);
+        newPullMarker.place();
         closePullPanel();
     });
 
