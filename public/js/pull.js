@@ -1,36 +1,45 @@
 (function(){
     var GEOCODEAPI_URL = 'http://maps.googleapis.com/maps/api/geocode/json';
 
-    var lat = 25.0293008,
-        lng = 121.5205833,
-        mapOptions = {
-            zoom: 15,
-            scrollwheel: false,
-            center: {
-              lat: lat,
-              lng: lng
-            }
-        },
-        map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions),
-        input = document.getElementById('loc-input'),
-        searchBox = new google.maps.places.SearchBox(input),
-        newPullMarker = null;
+    var PullPanel = (function(){
+        function PullPanel(className) {
+            this._className = className;
+            this._jqPanel = $(className);
 
-    var getJsonSync = function(url) {
+            //clode the lateral panel
+            this._jqPanel.on('click', function(event){
+                var isClose = $(event.target).is('.cd-panel');
+            
+                if(isClose) { 
+                    // TODO : ask the user whether to save changes before close it.
+                    panel.close();
+                    event.preventDefault();
+                }
+            });
+        }
 
-        var jqxhr = $.ajax({
-            type: 'GET',
-            url: url,
-            dataType: 'json',
-            cache: false,
-            async: false,
-        });
-
-        return {
-            valid: jqxhr.statusText,
-            data: jqxhr.responseJSON
+        PullPanel.prototype.setTitle = function(addr) {
+            $('.pull-whereis').text(addr);
         };
-    };
+
+        PullPanel.prototype.open = function() {
+            this._jqPanel.addClass('is-visible');
+        };
+
+        PullPanel.prototype.close = function() {
+            this._jqPanel.removeClass('is-visible');
+        };
+
+        PullPanel.prototype.save = function(pullMarker) {
+             // TODO : insert new pull record.
+
+            // place marker if save success
+            pullMarker.placeIt();
+            this.close();
+        };
+
+        return PullPanel;
+    })();
 
     var PullMarker = (function(){
 
@@ -71,7 +80,7 @@
             return (null === this._addr)?'不知名地方':this._addr;
         };
 
-        PullMarker.prototype.place = function(center) {
+        PullMarker.prototype.placeIt = function(center) {
             if (typeof center === 'undefined') {
                 center = true;
             }
@@ -103,6 +112,41 @@
 
         return PullMarker;
     })();
+
+    var lat = 25.0293008,
+        lng = 121.5205833,
+        mapOptions = {
+            zoom: 15,
+            scrollwheel: false,
+            center: {
+              lat: lat,
+              lng: lng
+            }
+        },
+        map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions),
+        input = document.getElementById('loc-input'),
+        searchBox = new google.maps.places.SearchBox(input),
+        panel = new PullPanel('.cd-panel');
+        newPullMarker = null;
+
+    var getJsonSync = function(url) {
+
+        var jqxhr = $.ajax({
+            type: 'GET',
+            url: url,
+            dataType: 'json',
+            cache: false,
+            async: false,
+        });
+
+        return {
+            valid: jqxhr.statusText,
+            data: jqxhr.responseJSON
+        };
+    };
+
+
+
 
     var placePullMarker = function(map, bounds) {
 
@@ -141,7 +185,8 @@
                             var pullJson = generatRandLatLng(pull);
                             var loc = new google.maps.LatLng(pullJson.lat, pullJson.lng);
                             var marker = new PullMarker(map, loc);
-                            marker.place(false);
+                            marker.setId(id);
+                            marker.placeIt(false);
                         });
                 } // end success
             }
@@ -182,39 +227,18 @@
     google.maps.event.addListener(map, 'click', function(event) {
         newPullMarker = new PullMarker(map, event.latLng);
         var addr = newPullMarker.getAddress();
-        $('.pull-whereis').text(addr);
-        openPullPanel();
+        panel.setTitle(addr);
+        panel.open();
     });
-
-    // Pull Panel
-    var openPullPanel = function() {
-        $('.cd-panel').addClass('is-visible');
-    };
-
-    var closePullPanel = function() {
-        $('.cd-panel').removeClass('is-visible');
-    };
 
     $('.pull-save').on('click', function(event){
         event.preventDefault();
-        // TODO : insert new pull record.
-        newPullMarker.place();
-        closePullPanel();
+        panel.save(newPullMarker);
     });
 
     $('.pull-cancel').on('click', function(event){
         event.preventDefault();
-        closePullPanel();        
+        panel.close();        
     });
 
-    //clode the lateral panel
-    $('.cd-panel').on('click', function(event){
-        var isClose = $(event.target).is('.cd-panel');
-    
-        if(isClose) { 
-            // TODO : ask the user whether to save changes before close it.
-            closePullPanel();
-            event.preventDefault();
-        }
-    });
 })(window);
