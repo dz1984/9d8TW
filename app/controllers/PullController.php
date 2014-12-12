@@ -13,6 +13,8 @@ class PullController extends BaseController {
         if (Request::ajax()){
             $bounds = Input::get('bounds');
 
+            // TODO : findout all pull records between this bounds.
+
             $mockPullList = array(
                 'status' => 'OK',
                 'message' => $bounds,
@@ -35,7 +37,15 @@ class PullController extends BaseController {
 
     public function postAdd(){
         if (Request::ajax()){
-
+            $latLng = Input::get('latLng');
+            $content = Input::get('content');
+            
+            // TODO : insert record.
+            $mockResponse = array(
+                'status'    => 'OK',
+                'message'   => $latLng.';'.$content,
+            );
+            return Response::json($mockResponse);
         }
     }
 }

@@ -3,12 +3,73 @@
 
     var PullPanel = (function(){
         function PullPanel(className) {
-            this._className = className;
-            this._jqPanel = $(className);
+
+            var defaultClassName = {
+                panel: '.cd-panel',
+                title: '.pull-whereis',
+                content: '.pull-content',
+            };
+
+            if (typeof className === 'undefined') {
+                className = defaultClassName;
+            }
+
+            this._className = {};
+            this._className.title = className.title || defaultClassName.title;
+            this._className.panel = className.panel || defaultClassName.panel;
+            this._className.content = className.content || defaultClassName.content;
+
+            this._jqPanel = $(this._className.panel);
+            this._jqTitle = $(this._className.title);
+            this._jqContent = $(this._className.content);
+
+            this._marker = null;
+
+            // private method
+            this._init = function(marker) {
+                this._marker = marker;
+                var addr = this._marker.getAddress();
+                this._setTitle(addr);
+            };
+
+            this._reset = function() {
+                this._marker = null;
+                this._setTitle('');
+                this._clearContent();
+            };
+
+            this._save = function(saveData) {
+                var jqxhr = $.ajax({
+                    type: 'POST',
+                    url: 'pull/add',
+                    data: saveData,
+                    dataType: 'JSON',
+                    cache: false,
+                    async: false,
+                });
+
+                return {
+                    valid: jqxhr.statusText,
+                    data: jqxhr.responseJSON
+                };
+            };
+
+            this._setTitle = function(addr) {
+                this._jqTitle.val(addr);
+             };
+
+            this._clearContent = function() {
+                $('.pull-content').val('');
+            };
+
+            this._getContent = function() {
+                var content = $.trim($('.pull-content').val());
+                return content;
+            };
 
             //clode the lateral panel
             this._jqPanel.on('click', function(event){
-                var isClose = $(event.target).is('.cd-panel');
+                var isClose = $(event.target).is(this._clasName);
             
                 if(isClose) { 
                     // TODO : ask the user whether to save changes before close it.
@@ -18,24 +79,31 @@
             });
         }
 
-        PullPanel.prototype.setTitle = function(addr) {
-            $('.pull-whereis').text(addr);
-        };
-
-        PullPanel.prototype.open = function() {
+        PullPanel.prototype.open = function(marker) {
+            this._init(marker);
             this._jqPanel.addClass('is-visible');
         };
 
         PullPanel.prototype.close = function() {
+            this._reset();
             this._jqPanel.removeClass('is-visible');
         };
 
-        PullPanel.prototype.save = function(pullMarker) {
-             // TODO : insert new pull record.
+        PullPanel.prototype.save = function() {
+            var markerLatLng = this._marker.getLatLng();
+            var mockSaveData = {
+                latLng: markerLatLng.toUrlValue(),
+                content: this._getContent()
+            };
 
-            // place marker if save success
-            pullMarker.placeIt();
-            this.close();
+            // TODO : insert new pull record.
+            var reply = this._save(mockSaveData);
+
+            if ('OK' === reply.valid && 'OK' === reply.data.status) {
+                // place marker if save success
+                this._marker.placeIt();
+                this.close();
+            }
         };
 
         return PullPanel;
@@ -48,8 +116,18 @@
             this._latLng = latLng;
             this._id = null;
             this._addr = null;
-            this._marker = null;            
+            this._marker = null;    
+            this._clickCallback = [];        
         }
+
+        PullMarker.prototype.addClickCallback = function(callback) {
+            // TODO : check the callback type is function
+            this._clickCallback.push(callback);
+        };
+
+        PullMarker.prototype.getLatLng = function() {
+            return this._latLng;
+        };
 
         PullMarker.prototype.setId = function(id) {
             this._id = id;
@@ -99,8 +177,12 @@
 
             // marker event handler
             (function(marker,id) {
-                google.maps.event.addListener(marker, 'click', function(){
+                google.maps.event.addListener(marker, 'click', function(event){
                     // TODO : show the pull record.
+                    this._clickCallback.forEach(function(callback){
+                        callback(event);
+                    });
+
                     console.log(id);
                 });
             })(this._marker, this._id);
@@ -126,7 +208,7 @@
         map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions),
         input = document.getElementById('loc-input'),
         searchBox = new google.maps.places.SearchBox(input),
-        panel = new PullPanel('.cd-panel');
+        panel = new PullPanel();
         newPullMarker = null;
 
     var getJsonSync = function(url) {
@@ -134,7 +216,7 @@
         var jqxhr = $.ajax({
             type: 'GET',
             url: url,
-            dataType: 'json',
+            dataType: 'JSON',
             cache: false,
             async: false,
         });
@@ -144,9 +226,6 @@
             data: jqxhr.responseJSON
         };
     };
-
-
-
 
     var placePullMarker = function(map, bounds) {
 
@@ -226,14 +305,13 @@
 
     google.maps.event.addListener(map, 'click', function(event) {
         newPullMarker = new PullMarker(map, event.latLng);
-        var addr = newPullMarker.getAddress();
-        panel.setTitle(addr);
-        panel.open();
+
+        panel.open(newPullMarker);
     });
 
     $('.pull-save').on('click', function(event){
         event.preventDefault();
-        panel.save(newPullMarker);
+        panel.save();
     });
 
     $('.pull-cancel').on('click', function(event){

@@ -17,7 +17,7 @@
   <div class="cd-panel-container">
     <div class="cd-panel-content">
       <div class="well pull-box">
-        <textarea class="form-control" rows="20" placeholder='有什麼話，想對土地公公訴苦？'></textarea>
+        <textarea class="pull-content form-control" rows="20" placeholder='有什麼話，想對土地公公訴苦？'></textarea>
         <button class="btn btn-primary pull-save">
           儲存
         </button>
