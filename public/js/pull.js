@@ -8,6 +8,7 @@
                 panel: '.cd-panel',
                 title: '.pull-whereis',
                 content: '.pull-content',
+                confides: '.pull-confides'
             };
 
             if (typeof className === 'undefined') {
@@ -18,24 +19,40 @@
             this._className.title = className.title || defaultClassName.title;
             this._className.panel = className.panel || defaultClassName.panel;
             this._className.content = className.content || defaultClassName.content;
+            this._className.confides = className.confides || defaultClassName.confides;
 
             this._jqPanel = $(this._className.panel);
             this._jqTitle = $(this._className.title);
             this._jqContent = $(this._className.content);
-
+            this._jqConfides = $(this._className.confides)
             this._marker = null;
 
             // private method
             this._init = function(marker) {
                 this._marker = marker;
+                var content = this._marker.getContent();
                 var addr = this._marker.getAddress();
-                this._setTitle(addr);
+                var confides = this._marker.getConfides();
+
+                if (null !== content) {
+                    this._setContent(content);
+                }
+
+                if (null !== addr ) {
+                    this._setTitle(addr);
+                }
+
+                if (null !== confides) {
+                    this._setConfides(confides);
+                }
+
             };
 
             this._reset = function() {
                 this._marker = null;
                 this._setTitle('');
                 this._clearContent();
+                this._clearConfides();
             };
 
             this._save = function(saveData) {
@@ -59,7 +76,11 @@
              };
 
             this._clearContent = function() {
-                this._jqContent.val('');
+                this._setContent('');
+            };
+
+            this._setContent = function(content) {
+                this._jqContent.val(content);
             };
 
             this._getContent = function() {
@@ -68,16 +89,23 @@
                 return content;
             };
 
-            //clode the lateral panel
-            this._jqPanel.on('click', function(event){
-                var isClose = $(event.target).is(this._clasName);
-            
-                if(isClose) { 
-                    // TODO : ask the user whether to save changes before close it.
-                    panel.close();
-                    event.preventDefault();
-                }
-            });
+            this._setConfides = function(confides) {
+                var jqConfides = this._jqConfides;
+                confides.forEach(function(confide){
+                    var content = confide.content;
+                    var jqConfide = $("<div>");
+                    var jqBlockquote = $("<blockquote>");
+                    jqBlockquote.text(content);
+                    jqConfide.addClass('well well-sm');
+                    jqConfide.append(jqBlockquote);
+                    jqConfides.append(jqConfide);
+                });
+            };
+
+            this._clearConfides = function() {
+                this._jqConfides.text('');
+            };
+
         }
 
         PullPanel.prototype.open = function(marker) {
@@ -91,10 +119,12 @@
         };
 
         PullPanel.prototype.save = function() {
+            var markerId = this._marker.getId();
             var content = this._getContent();
             var markerAddr = this._marker.getAddress();
             var markerLatLng = this._marker.getLatLng();
             var mockSaveData = {
+                id: markerId,
                 lat: markerLatLng.lat(),
                 lng: markerLatLng.lng(),
                 addr: markerAddr,
@@ -105,6 +135,8 @@
             var reply = this._save(mockSaveData);
 
             if ('OK' === reply.valid && 'OK' === reply.data.status) {
+                var confides = reply.data.pull.confides;
+                this._marker.setConfides(confides);
                 // place marker if save success
                 this._marker.placeIt();
                 this.close();
@@ -123,6 +155,7 @@
             this._addr = null;
             this._content = null;
             this._marker = null;   
+            this._confides = null;
             this._clickCallback = [];       
         }
 
@@ -149,6 +182,14 @@
 
         PullMarker.prototype.getContent = function() {
             return this._content;
+        };
+
+        PullMarker.prototype.getConfides = function() {
+            return this._confides;
+        };
+
+        PullMarker.prototype.setConfides = function(confides) {
+            this._confides = confides;
         };
 
         PullMarker.prototype.setAddress = function(addr) {
@@ -200,8 +241,6 @@
                     callbackList.forEach(function(callback){
                         callback(event);
                     });
-
-                    console.log(id);
                 });
             })(this._id, this._marker, this._clickCallback);
 
@@ -259,14 +298,17 @@
 
                         pullJsonList.forEach(function(pullJson){
                             var id = pullJson.id;
-                            var addr = pullJson.addr;
-                            var content = pullJson.content;
+                            var addr = pullJson.address;
+                            var confides = pullJson.confides;
                             var loc = new google.maps.LatLng(pullJson.lat, pullJson.lng);
                             var marker = new PullMarker(map, loc);
 
                             marker.setId(id);
                             marker.setAddress(addr);
-                            marker.setContent(content);
+                            marker.setConfides(confides);
+                            marker.addClickCallback(function(event){
+                                panel.open(marker);
+                            });
                             marker.placeIt(false);
                         });
                 } // end success

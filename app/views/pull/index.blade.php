@@ -17,14 +17,17 @@
   <div class="cd-panel-container">
     <div class="cd-panel-content">
       <div class="well pull-box">
-        <textarea class="pull-content form-control" rows="20" placeholder='有什麼話，想對土地公公訴苦？'></textarea>
+        <textarea class="pull-content form-control" rows="10" placeholder='有什麼話，想對土地公公訴苦？'></textarea>
         <button class="btn btn-primary pull-save">
           儲存
         </button>
         <button class="btn btn-default pull-cancel">
           取消
         </button>
-      </div>
+      </div> <!-- pull-box -->
+      <div class='pull-confides-box'>
+        <div class='pull-confides'></div>
+      </div> <!-- pull-confides -->
     </div> <!-- cd-panel-content -->
   </div> <!-- cd-panel-container -->
 </div> <!-- cd-panel -->

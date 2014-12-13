@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreatePullsTable extends Migration {
+class CreateConfidesTable extends Migration {
 
 	/**
 	 * Run the migrations.
@@ -12,11 +12,10 @@ class CreatePullsTable extends Migration {
 	 */
 	public function up()
 	{
-		Schema::create('pulls', function($table){
+		Schema::create('confides', function($table){
 			$table->increments('id');
-			$table->string('lat');
-			$table->string('lng');
-			$table->text('address');
+			$table->integer('pull_id')->references('id')->on('pulls');
+			$table->text('content');
 			$table->softDeletes();
 			$table->timestamps();
 		});
@@ -29,7 +28,7 @@ class CreatePullsTable extends Migration {
 	 */
 	public function down()
 	{
-		Schema::dropIfExists('pulls');
+		Schema::dropIfExists('confides');
 	}
 
 }

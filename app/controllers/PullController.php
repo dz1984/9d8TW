@@ -11,38 +11,61 @@ class PullController extends BaseController {
     
     public function getAll() {
         if (Request::ajax()){
-            $pulls = Pull::all(array('lat','lng','content'));
+            $pulls = Pull::with('confides')->get(array('id','lat','lng','address'));
+
             $bounds = Input::get('bounds');
 
             // findout all pull records between this bounds.
 
             $responseJson = array(
                 'status' => 'OK',
-                'message' => $bounds,
+                'message' => '',
                 'pulls' => $pulls->toArray()
             );
             return Response::json($responseJson);            
         }
     }
 
+    public function getTest() {
+        $pull = Pull::find(1, array('id'));
+        $pull->load('confides');
+
+        return Response::json($pull->toArray());
+    }
+
     public function postAdd(){
         if (Request::ajax()){
+            $id = Input::get('id');
             $lat = Input::get('lat');
             $lng = Input::get('lng');
             $addr = Input::get('addr');
             $content = Input::get('content');
             
-            $pull = new Pull;
+            if (null === $id) {
+                $pull = new Pull;
+                $pull->lat = $lat;
+                $pull->lng = $lng;
+                $pull->address = $addr;
+                $pull->save();
 
-            $pull->lat = $lat;
-            $pull->lng = $lng;
-            $pull->address = $addr;
-            $pull->content = $content;
-            $pull->save();
+                $id = $pull->id;
+
+            } else {
+                $pull = Pull::find($id);
+            }
+
+            $confide = new Confide;
+            $confide->pull_id = $pull->id;
+            $confide->content = $content;
+            $confide->save();
+
+            $pull = Pull::find($id, array('id'));
+            $pull->load('confides');
 
             $responseJson = array(
                 'status'    => 'OK',
-                'message'   => $lat.';'.$lng.';'.$addr.';'.$content,
+                'message'   => '',
+                'pull'  => $pull->toArray()
             );
 
             return Response::json($responseJson);
