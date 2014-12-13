@@ -16,10 +16,8 @@
             }
 
             this._className = {};
-            this._className.title = className.title || defaultClassName.title;
-            this._className.panel = className.panel || defaultClassName.panel;
-            this._className.content = className.content || defaultClassName.content;
-            this._className.confides = className.confides || defaultClassName.confides;
+
+            $.extend(this._className, defaultClassName, className);
 
             this._jqPanel = $(this._className.panel);
             this._jqTitle = $(this._className.title);
