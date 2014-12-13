@@ -26,13 +26,6 @@ class PullController extends BaseController {
         }
     }
 
-    public function getTest() {
-        $pull = Pull::find(1, array('id'));
-        $pull->load('confides');
-
-        return Response::json($pull->toArray());
-    }
-
     public function postAdd(){
         if (Request::ajax()){
             $id = Input::get('id');

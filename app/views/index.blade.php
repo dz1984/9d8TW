@@ -15,9 +15,10 @@
     <div class="col-md-12">
       <a href="pull">
       <ul id="scene" class="scene" data-limit-x="30" data-limit-y="false">
-        <li class="layer" data-depth="0.60">{{ HTML::image("images/layout01.png") }}</li>
-        <li class="layer" data-depth="0.80">{{ HTML::image("images/layout02.png") }}</li>
-        <li class="layer" data-depth="1.00">{{ HTML::image("images/layout03.png") }}</li>
+        <li class="layer" data-depth="0.40">{{ HTML::image("images/layout01.png") }}</li>
+        <li class="layer" data-depth="0.60">{{ HTML::image("images/layout02.png") }}</li>
+        <li class="layer" data-depth="0.80">{{ HTML::image("images/layout03.png") }}</li>
+        <li class="layer" data-depth="1.00">{{ HTML::image("images/layout04.png") }}</li>
       </ul>
       </a>
     </div>
