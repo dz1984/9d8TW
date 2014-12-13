@@ -26,15 +26,15 @@ class PullController extends BaseController {
         }
     }
 
-    public function postAdd(){
+    public function getAdd(){
         if (Request::ajax()){
             $id = Input::get('id');
             $lat = Input::get('lat');
             $lng = Input::get('lng');
             $addr = Input::get('addr');
             $content = Input::get('content');
-            
-            if (null === $id) {
+  
+            if (null == $id) {
                 $pull = new Pull;
                 $pull->lat = $lat;
                 $pull->lng = $lng;
