@@ -253,7 +253,7 @@
     var lat = 25.0293008,
         lng = 121.5205833,
         mapOptions = {
-            zoom: 15,
+            zoom: 10,
             scrollwheel: false,
             center: {
               lat: lat,
@@ -263,6 +263,11 @@
         map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions),
         input = document.getElementById('loc-input'),
         searchBox = new google.maps.places.SearchBox(input),
+        strictBounds = new google.maps.LatLngBounds(
+            new google.maps.LatLng(21.5, 119.1),
+            new google.maps.LatLng(25.4, 122.4)
+        ),
+        minZoomLevel = 8,
         panel = new PullPanel();
 
     var getJsonSync = function(url) {
@@ -323,6 +328,8 @@
         if (places.length == 0) {
             return;
         }
+        
+        // TODO : check the place location is over than Taiwan
 
         var bounds = new google.maps.LatLngBounds();
 
@@ -348,6 +355,36 @@
         var newPullMarker = new PullMarker(map, event.latLng);
 
         panel.open(newPullMarker);
+    });
+
+    google.maps.event.addListener(map, 'dragend', function() {
+        var center = map.getCenter();
+
+        if (strictBounds.contains(center)) {
+            return;
+        }
+        console.log(center);
+
+        var x = center.lng(),
+            y = center.lat(),
+            maxX = strictBounds.getNorthEast().lng(),
+            maxY = strictBounds.getNorthEast().lat(),
+            minX = strictBounds.getSouthWest().lng(),
+            minY = strictBounds.getSouthWest().lat();
+
+        if (x < minX) x = minX;
+        if (x > maxX) x = maxX;
+        if (y < minY) y = minY;
+        if (y > maxY) y = maxY;
+
+        map.setCenter(new google.maps.LatLng(y, x));
+    });
+
+    google.maps.event.addListener(map, 'zoom_changed', function() {
+  
+          if (map.getZoom() < minZoomLevel) {
+            map.setZoom(minZoomLevel);
+        }
     });
 
     $('.pull-save').on('click', function(event){
