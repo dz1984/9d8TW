@@ -264,7 +264,6 @@
         input = document.getElementById('loc-input'),
         searchBox = new google.maps.places.SearchBox(input),
         panel = new PullPanel();
-        newPullMarker = null;
 
     var getJsonSync = function(url) {
 
@@ -346,7 +345,7 @@
     });
 
     google.maps.event.addListener(map, 'click', function(event) {
-        newPullMarker = new PullMarker(map, event.latLng);
+        var newPullMarker = new PullMarker(map, event.latLng);
 
         panel.open(newPullMarker);
     });

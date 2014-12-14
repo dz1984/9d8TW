@@ -11,11 +11,16 @@ class PullController extends BaseController {
     
     public function getAll() {
         if (Request::ajax()){
-            $pulls = Pull::with('confides')->get(array('id','lat','lng','address'));
+            
 
             $bounds = Input::get('bounds');
 
             // findout all pull records between this bounds.
+            list($lat_lo,$lng_lo,$lat_hi,$lng_hi) = explode(',',$bounds);
+            $pulls = Pull::with('confides')
+                ->whereBetween('lat', array($lat_lo, $lat_hi))
+                ->whereBetween('lng', array($lng_lo, $lng_hi))
+                ->get(array('id','lat','lng','address'));
 
             $responseJson = array(
                 'status' => 'OK',

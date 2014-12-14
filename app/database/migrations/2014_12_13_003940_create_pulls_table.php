@@ -14,8 +14,8 @@ class CreatePullsTable extends Migration {
 	{
 		Schema::create('pulls', function($table){
 			$table->increments('id');
-			$table->string('lat');
-			$table->string('lng');
+			$table->double('lat');
+			$table->double('lng');
 			$table->text('address');
 			$table->softDeletes();
 			$table->timestamps();
