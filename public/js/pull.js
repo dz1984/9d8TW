@@ -55,7 +55,7 @@
 
             this._save = function(saveData) {
                 var jqxhr = $.ajax({
-                    type: 'POST',
+                    type: 'GET',
                     url: 'pull/add',
                     data: saveData,
                     dataType: 'JSON',
