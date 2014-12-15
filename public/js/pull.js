@@ -2,6 +2,7 @@
     var GEOCODEAPI_URL = 'http://maps.googleapis.com/maps/api/geocode/json';
 
     var PullPanel = (function(){
+
         function PullPanel(className) {
 
             var defaultClassName = {
@@ -88,14 +89,17 @@
             };
 
             this._setConfides = function(confides) {
+                this._clearConfides();
+                
                 var jqConfides = this._jqConfides;
+
                 confides.forEach(function(confide){
                     var content = confide.content;
-                    var jqConfide = $("<div>");
-                    var jqBlockquote = $("<blockquote>");
-                    jqBlockquote.text(content);
-                    jqConfide.addClass('well well-sm');
-                    jqConfide.append(jqBlockquote);
+                    var jqBlockquote = $("<blockquote>").text(content);
+                    var jqConfide = $("<div>")
+                                        .addClass('well well-sm')
+                                        .append(jqBlockquote);
+
                     jqConfides.append(jqConfide);
                 });
             };
@@ -121,7 +125,7 @@
             var content = this._getContent();
             var markerAddr = this._marker.getAddress();
             var markerLatLng = this._marker.getLatLng();
-            var mockSaveData = {
+            var saveData = {
                 id: markerId,
                 lat: markerLatLng.lat(),
                 lng: markerLatLng.lng(),
@@ -129,13 +133,21 @@
                 content: content
             };
 
-            // TODO : insert new pull record.
-            var reply = this._save(mockSaveData);
+            // insert new pull record.
+            var reply = this._save(saveData);
 
             if ('OK' === reply.valid && 'OK' === reply.data.status) {
+
                 var confides = reply.data.pull.confides;
                 this._marker.setConfides(confides);
                 // place marker if save success
+                var self = this,
+                    marker = this._marker;
+
+                this._marker.addClickCallback(function(event){
+                    self.open(marker);
+                });
+
                 this._marker.placeIt();
                 this.close();
             }
