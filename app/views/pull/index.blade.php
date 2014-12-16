@@ -36,6 +36,7 @@
 @section('script')
 {{ HTML::script('https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places') }}
 {{ HTML::script('js/pull.js') }}
+{{ HTML::script('js/map.js') }}
 
 <script>
   $(document).ready(function(){
