@@ -183,60 +183,67 @@ var Pull = (function(){
       this.close();
   };
 
-  function Marker(map, latLng) {
-      this._map = map;
-      this._latLng = latLng;
-      this._id = null;
-      this._addr = null;
-      this._content = null;
-      this._marker = null;   
-      this._confides = null;
-      this._clickCallback = [];       
+  function Marker(opts) {
+    var defaultOpt = {
+        map: null,
+        latLng: null,
+        id: null,
+        addr: null,
+        content: null,
+        marker: null,
+        confides: null,
+        clickCallback: []
+    };
+
+    this._opts = {};
+
+    $.extend(this._opts,defaultOpt, opts);
+
   }
 
   Marker.prototype.addClickCallback = function(callback) {
       // TODO : check the callback type is function
-      this._clickCallback.push(callback);
+      this._opts.clickCallback.push(callback);
   };
 
   Marker.prototype.getLatLng = function() {
-      return this._latLng;
+      return this._opts.latLng;
   };
 
   Marker.prototype.setId = function(id) {
-      this._id = id;
+      this._opts.id = id;
   };
 
   Marker.prototype.getId = function(id) {
-      return this._id;
+      return this._opts.id;
   };
 
   Marker.prototype.setContent = function(content) {
-      this._content = content;
+      this._opts.content = content;
   };
 
   Marker.prototype.getContent = function() {
-      return this._content;
+      return this._opts.content;
   };
 
   Marker.prototype.getConfides = function() {
-      return this._confides;
+      return this._opts.confides;
   };
 
   Marker.prototype.setConfides = function(confides) {
-      this._confides = confides;
+      this._opts.confides = confides;
   };
 
   Marker.prototype.setAddress = function(addr) {
-      this._addr = addr;
+      this._opts.addr = addr;
   };
 
   Marker.prototype.getAddress = function() {
-      if (this._addr !== null) {
-          return this._addr;
+      if (this._opts.addr !== null) {
+          return this._opts.addr;
       }
 
-      var strLocation = this._latLng.toUrlValue();
+      var strLocation = this._opts.latLng.toUrlValue();
       var param = $.param({
           'latlng': strLocation,
           'components': 'route'
@@ -246,10 +253,10 @@ var Pull = (function(){
       var reply = getJsonSync(apiUrl);
 
       if (reply.valid == 'OK' && reply.data.status == 'OK') {
-          this._addr = reply.data.results[0].formatted_address;
+          this._opts.addr = reply.data.results[0].formatted_address;
       } 
 
-      return (null === this._addr)?'不知名地方':this._addr;
+      return (null === this._opts.addr)?'不知名地方':this._opts.addr;
   };
 
   Marker.prototype.placeIt = function(center) {
@@ -258,8 +265,8 @@ var Pull = (function(){
       }
 
       var markerOptions = {
-        position: this._latLng,
-        map: this._map,
+        position: this._opts.latLng,
+        map: this._opts.map,
         icon: {
           url: 'images/fist-icon.png',
           scaledSize: new google.maps.Size(20, 20),
@@ -267,7 +274,7 @@ var Pull = (function(){
         }
       };
 
-      this._marker = new google.maps.Marker(markerOptions);
+      this._opts.marker = new google.maps.Marker(markerOptions);
 
       // marker event handler
       (function(id, marker, callbackList) {
@@ -276,10 +283,10 @@ var Pull = (function(){
                   callback(event);
               });
           });
-      })(this._id, this._marker, this._clickCallback);
+      })(this._opts.id, this._opts.marker, this._opts.clickCallback);
 
       if (true === center){
-          this._map.setCenter(this._latLng);
+          this._opts.map.setCenter(this._opts.latLng);
       }
   };
     

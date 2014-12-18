@@ -37,14 +37,20 @@
                             var addr = pullJson.address;
                             var confides = pullJson.confides;
                             var loc = new google.maps.LatLng(pullJson.lat, pullJson.lng);
-                            var marker = new Pull.Marker(map, loc);
+                            var marker = new Pull.Marker(
+                                {
+                                    map: map, 
+                                    latLng: loc,
+                                    id: id,
+                                    addr: addr,
+                                    confides: confides,               
+                                }
+                            );
 
-                            marker.setId(id);
-                            marker.setAddress(addr);
-                            marker.setConfides(confides);
                             marker.addClickCallback(function(event){
                                 panel.open(marker);
                             });
+                            
                             marker.placeIt(false);
                         });
                 } // end success
@@ -63,11 +69,10 @@
             return;
         }
         
-        // TODO : check the place location is over than Taiwan
-
         var bounds = new google.maps.LatLngBounds();
 
         for (var i = 0, place; place = places[i]; i++) {
+            // TODO : check the place location is over than Taiwan
             bounds.extend(place.geometry.location);
         }
 
@@ -86,7 +91,7 @@
     });
 
     google.maps.event.addListener(map, 'click', function(event) {
-        var newPullMarker = new Pull.Marker(map, event.latLng);
+        var newPullMarker = new Pull.Marker({map: map, latLng: event.latLng});
 
         panel.open(newPullMarker);
     });

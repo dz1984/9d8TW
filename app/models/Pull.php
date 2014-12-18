@@ -7,6 +7,6 @@ class Pull extends Eloquent {
 
     public function confides() {
         return $this->hasMany('Confide')
-            ->select(array('content'));
+            ->select(array('pull_id','content'));
     }
 }
