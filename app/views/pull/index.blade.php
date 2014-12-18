@@ -1,7 +1,7 @@
 @extends('layouts.default')
 @section('header')
-{{ HTML::style('css/slide.css') }}
 {{ HTML::style('css/pull.css') }}
+{{ HTML::style('css/slide.css') }}
 @stop
 
 @section('content')

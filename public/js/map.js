@@ -120,13 +120,4 @@
         }
     });
     
-    $('.pull-save').on('click', function(event){
-        event.preventDefault();
-        panel.save();
-    });
-
-    $('.pull-cancel').on('click', function(event){
-      event.preventDefault();
-      panel.close();        
-    });
 })();

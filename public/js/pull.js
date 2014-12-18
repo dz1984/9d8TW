@@ -19,11 +19,16 @@ var Pull = (function(){
 
   function Panel(className) {
 
+      var _self = this;
+
       var defaultClassName = {
           panel: '.cd-panel',
           title: '.pull-whereis',
           content: '.pull-content',
-          confides: '.pull-confides'
+          box: '.pull-box',
+          confides: '.pull-confides',
+          saveBtn:     '.pull-save',
+          cancelBtn: '.pull-cancel'
       };
 
       if (typeof className === 'undefined') {
@@ -37,7 +42,11 @@ var Pull = (function(){
       this._jqPanel = $(this._className.panel);
       this._jqTitle = $(this._className.title);
       this._jqContent = $(this._className.content);
-      this._jqConfides = $(this._className.confides)
+      this._jqBox = $(this._className.box);
+      this._jqConfides = $(this._className.confides);
+      this._jqSaveBtn = $(this._className.saveBtn);
+      this._jqCancelBtn = $(this._className.cancelBtn);
+
       this._marker = null;
 
       // private method
@@ -59,6 +68,13 @@ var Pull = (function(){
               this._setConfides(confides);
           }
 
+          this._jqSaveBtn.on('click', function() {
+            _self.save();
+          });
+
+          this._jqCancelBtn.bind('click', function(){
+            _self.close();
+          });
       };
 
       this._reset = function() {
@@ -155,16 +171,16 @@ var Pull = (function(){
           var confides = reply.data.pull.confides;
           this._marker.setConfides(confides);
           // place marker if save success
-          var self = this,
-              marker = this._marker;
+          var marker = this._marker;
 
           this._marker.addClickCallback(function(event){
-              self.open(marker);
+              _self.open(marker);
           });
 
           this._marker.placeIt();
-          this.close();
       }
+
+      this.close();
   };
 
   function Marker(map, latLng) {
@@ -256,7 +272,6 @@ var Pull = (function(){
       // marker event handler
       (function(id, marker, callbackList) {
           google.maps.event.addListener(marker, 'click', function(event){
-              // TODO : show the pull record.
               callbackList.forEach(function(callback){
                   callback(event);
               });
