@@ -6,6 +6,6 @@ class Confide extends Eloquent {
     use SoftDeletingTrait;
 
     public function pull() {
-        return $this->belongsTo('Pull')->select(array('id','content'));
+        return $this->belongsTo('Pull');
     }
 }
