@@ -1,4 +1,5 @@
 var Pull = (function(){
+  'use strict';
   var GEOCODEAPI_URL = 'http://maps.googleapis.com/maps/api/geocode/json';
 
   var getJsonSync = function(url) {
@@ -52,6 +53,8 @@ var Pull = (function(){
       // private method
       this._init = function(marker) {
           this._marker = marker;
+
+          var _self = this;
           var content = this._marker.getContent();
           var addr = this._marker.getAddress();
           var confides = this._marker.getConfides();
@@ -151,10 +154,13 @@ var Pull = (function(){
   };
 
   Panel.prototype.save = function() {
+      var _self = this;
+      
       var markerId = this._marker.getId();
       var content = this._getContent();
       var markerAddr = this._marker.getAddress();
       var markerLatLng = this._marker.getLatLng();
+
       var saveData = {
           id: markerId,
           lat: markerLatLng.lat(),

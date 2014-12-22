@@ -1,5 +1,6 @@
-(function(){
 
+(function(){
+    'use strict';
     var initLat = 25.0293008,
         initLng = 121.5205833,
         mapOptions = {
@@ -33,17 +34,14 @@
                         var pullJsonList = responseJson.pulls;
 
                         pullJsonList.forEach(function(pullJson){
-                            var id = pullJson.id;
-                            var addr = pullJson.address;
-                            var confides = pullJson.confides;
-                            var loc = new google.maps.LatLng(pullJson.lat, pullJson.lng);
+           
                             var marker = new Pull.Marker(
                                 {
                                     map: map, 
-                                    latLng: loc,
-                                    id: id,
-                                    addr: addr,
-                                    confides: confides,               
+                                    latLng: new google.maps.LatLng(pullJson.lat, pullJson.lng),
+                                    id: pullJson.id,
+                                    addr:  pullJson.address,
+                                    confides: pullJson.confides,               
                                 }
                             );
 
@@ -65,7 +63,7 @@
     google.maps.event.addListener(searchBox, 'places_changed', function() {
         var places = searchBox.getPlaces();
 
-        if (places.length == 0) {
+        if (places.length === 0) {
             return;
         }
         
@@ -120,7 +118,7 @@
 
     google.maps.event.addListener(map, 'zoom_changed', function() {
   
-          if (map.getZoom() < minZoomLevel) {
+        if (map.getZoom() < minZoomLevel) {
             map.setZoom(minZoomLevel);
         }
     });
