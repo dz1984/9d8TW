@@ -50,6 +50,14 @@ var Pull = (function(){
 
       this._marker = null;
 
+      this._jqSaveBtn.on('click', function() {
+        _self.save();
+      });
+
+      this._jqCancelBtn.on('click', function(){
+        _self.close();
+      });
+
       // private method
       this._init = function(marker) {
           this._marker = marker;
@@ -71,13 +79,6 @@ var Pull = (function(){
               this._setConfides(confides);
           }
 
-          this._jqSaveBtn.on('click', function() {
-            _self.save();
-          });
-
-          this._jqCancelBtn.bind('click', function(){
-            _self.close();
-          });
       };
 
       this._reset = function() {
@@ -174,7 +175,10 @@ var Pull = (function(){
 
       if ('OK' === reply.valid && 'OK' === reply.data.status) {
 
+          var id = reply.data.pull.id;
           var confides = reply.data.pull.confides;
+
+          this._marker.setId(id);
           this._marker.setConfides(confides);
           // place marker if save success
           var marker = this._marker;
@@ -220,7 +224,7 @@ var Pull = (function(){
       this._opts.id = id;
   };
 
-  Marker.prototype.getId = function(id) {
+  Marker.prototype.getId = function() {
       return this._opts.id;
   };
 
