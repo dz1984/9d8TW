@@ -45,9 +45,7 @@
                                 }
                             );
 
-                            marker.addClickCallback(function(event){
-                                panel.open(marker);
-                            });
+                            marker.addDefaultClickCallback(panel);
                             
                             marker.placeIt(false);
                         });

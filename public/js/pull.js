@@ -180,13 +180,10 @@ var Pull = (function(){
 
           this._marker.setId(id);
           this._marker.setConfides(confides);
+
+          this._marker.addDefaultClickCallback(this);
+
           // place marker if save success
-          var marker = this._marker;
-
-          this._marker.addClickCallback(function(event){
-              _self.open(marker);
-          });
-
           this._marker.placeIt();
       }
 
@@ -214,6 +211,13 @@ var Pull = (function(){
   Marker.prototype.addClickCallback = function(callback) {
       // TODO : check the callback type is function
       this._opts.clickCallback.push(callback);
+  };
+
+  Marker.prototype.addDefaultClickCallback = function(panel) {
+      // TODO : check the panel type
+      this.addClickCallback(function() {
+          panel.open(this);
+      });
   };
 
   Marker.prototype.getLatLng = function() {
@@ -287,13 +291,13 @@ var Pull = (function(){
       this._opts.marker = new google.maps.Marker(markerOptions);
 
       // marker event handler
-      (function(id, marker, callbackList) {
+      (function(obj, id, marker, callbackList) {
           google.maps.event.addListener(marker, 'click', function(event){
               callbackList.forEach(function(callback){
-                  callback(event);
+                  callback.bind(obj, event)();
               });
           });
-      })(this._opts.id, this._opts.marker, this._opts.clickCallback);
+      })(this, this._opts.id, this._opts.marker, this._opts.clickCallback);
 
       if (true === center){
           this._opts.map.setCenter(this._opts.latLng);
