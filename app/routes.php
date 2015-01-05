@@ -11,9 +11,5 @@
 |
 */
 
-Route::get('/', function()
-{
-	return View::make('index');
-});
-
-Route::controller('/pull', 'PullController');
+Route::get('/', 'HomeController@getIndex');
+Route::controller('pull', 'PullController');

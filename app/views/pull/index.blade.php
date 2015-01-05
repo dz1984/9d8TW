@@ -1,4 +1,3 @@
-@extends('layouts.default')
 @section('header')
 {{ HTML::style('css/pull.css') }}
 {{ HTML::style('css/slide.css') }}

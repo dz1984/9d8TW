@@ -6,13 +6,18 @@ class PullController extends BaseController {
     }
 
     public function getIndex() {
-        return View::make('pull.index');
+        $this->view('pull.index');
     }
     
     public function getAll() {
-        if (Request::ajax()){
-            
+        $responseJson = array(
+            'status'    => 'FAIL',
+            'message'   => '',
+            'pull'  => array()
+        );
 
+        if (Request::ajax()){
+        
             $bounds = Input::get('bounds');
 
             // findout all pull records between this bounds.
@@ -27,11 +32,18 @@ class PullController extends BaseController {
                 'message' => '',
                 'pulls' => $pulls->toArray()
             );
-            return Response::json($responseJson);            
+                        
         }
+        return $this->json($responseJson);
     }
 
     public function getAdd(){
+        $responseJson = array(
+            'status'    => 'FAIL',
+            'message'   => '',
+            'pull'  => array()
+        );
+
         if (Request::ajax()){
             $id = Input::get('id');
             $lat = Input::get('lat');
@@ -64,9 +76,9 @@ class PullController extends BaseController {
                 'status'    => 'OK',
                 'message'   => '',
                 'pull'  => $pull->toArray()
-            );
-
-            return Response::json($responseJson);
+            );  
         }
+
+        return $this->json($responseJson);
     }
 }
