@@ -1,8 +1,12 @@
 <?php
+use Repository\IPullRepository;
 
 class PullController extends BaseController {
-    public function __construct() {
+    private $pull;
+
+    public function __construct(IPullRepository $pull) {
         parent::__construct();
+        $this->pull = $pull;
     }
 
     public function getIndex() {
@@ -21,11 +25,7 @@ class PullController extends BaseController {
             $bounds = Input::get('bounds');
 
             // findout all pull records between this bounds.
-            list($lat_lo,$lng_lo,$lat_hi,$lng_hi) = explode(',',$bounds);
-            $pulls = Pull::with('confides')
-                ->whereBetween('lat', array($lat_lo, $lat_hi))
-                ->whereBetween('lng', array($lng_lo, $lng_hi))
-                ->get(array('id','lat','lng','address'));
+            $pulls = $this->pull->findAllByBounds($bounds);
 
             $responseJson = array(
                 'status' => 'OK',
@@ -52,25 +52,18 @@ class PullController extends BaseController {
             $content = Input::get('content');
   
             if (null == $id) {
-                $pull = new Pull;
-                $pull->lat = $lat;
-                $pull->lng = $lng;
-                $pull->address = $addr;
-                $pull->save();
+                $pull = $this->pull->addPull(array(
+                    'lat'   => $lat,
+                    'lng'   => $lng,
+                    'addr'  => $addr
+                ));
 
                 $id = $pull->id;
-
-            } else {
-                $pull = Pull::find($id);
-            }
-
-            $confide = new Confide;
-            $confide->pull_id = $pull->id;
-            $confide->content = $content;
-            $confide->save();
-
-            $pull = Pull::find($id, array('id'));
-            $pull->load('confides');
+            } 
+            
+            $this->pull->addConfide($id, $content);
+     
+            $pull = $this->pull->findById($id);
 
             $responseJson = array(
                 'status'    => 'OK',
