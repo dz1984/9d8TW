@@ -2,59 +2,70 @@
 use Repository\IPullRepository;
 
 class PullController extends BaseController {
-    private $pull;
+    private $pullRepository;
 
-    public function __construct(IPullRepository $pull) {
+    public function __construct(IPullRepository $pullRepository)
+    {
         parent::__construct();
-        $this->pull = $pull;
+        $this->pullRepository = $pullRepository;
     }
 
-    public function getIndex() {
+    public function getIndex()
+    {
         $this->view('pull.index');
     }
-    
-    public function getAll() {
+
+    public function getAll()
+    {
         $status = 'FAIL';
         $message = '';
-        $pull  = array();
+        $pulls = array();
 
-        if (Request::ajax()){
-        
+        if (Request::ajax())
+        {
+
             $bounds = Input::get('bounds');
 
             // findout all pull records between this bounds.
-            $pulls = $this->pull->findAllByBounds($bounds)
-                                ->toArray();
+            $pulls = $this->pullRepository
+                          ->findAllByBounds($bounds)
+                          ->toArray();
 
             $status = 'OK';
-                        
+
         }
-        
+
         return $this->json(compact('status', 'message', 'pulls'));
     }
 
-    public function getAdd(){
+    public function getAdd()
+    {
         $status = 'FAIL';
         $message = '';
-        $pull  = array();
+        $pull = array();
 
-        if (Request::ajax()){
+        if (Request::ajax())
+        {
             $id = Input::get('id');
             $lat = Input::get('lat');
             $lng = Input::get('lng');
             $addr = Input::get('addr');
             $content = Input::get('content');
-  
-            if (null == $id) {
-                $pull = $this->pull->addPull(compact('lat', 'lng', 'addr'));
+
+            if (null == $id)
+            {
+                $pull = $this->pullRepository
+                             ->addPull(compact('lat', 'lng', 'addr'));
 
                 $id = $pull->id;
-            } 
-            
-            $this->pull->addConfide($id, $content);
-     
-            $pull = $this->pull->findById($id)
-                                ->toArray();
+            }
+
+            $this->pullRepository
+                 ->addConfide($id, $content);
+
+            $pull = $this->pullRepository
+                         ->findById($id)
+                         ->toArray();
 
             $status = 'OK';
         }
