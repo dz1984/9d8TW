@@ -14,35 +14,29 @@ class PullController extends BaseController {
     }
     
     public function getAll() {
-        $responseJson = array(
-            'status'    => 'FAIL',
-            'message'   => '',
-            'pull'  => array()
-        );
+        $status = 'FAIL';
+        $message = '';
+        $pull  = array();
 
         if (Request::ajax()){
         
             $bounds = Input::get('bounds');
 
             // findout all pull records between this bounds.
-            $pulls = $this->pull->findAllByBounds($bounds);
+            $pulls = $this->pull->findAllByBounds($bounds)
+                                ->toArray();
 
-            $responseJson = array(
-                'status' => 'OK',
-                'message' => '',
-                'pulls' => $pulls->toArray()
-            );
+            $status = 'OK';
                         
         }
-        return $this->json($responseJson);
+        
+        return $this->json(compact('status', 'message', 'pulls'));
     }
 
     public function getAdd(){
-        $responseJson = array(
-            'status'    => 'FAIL',
-            'message'   => '',
-            'pull'  => array()
-        );
+        $status = 'FAIL';
+        $message = '';
+        $pull  = array();
 
         if (Request::ajax()){
             $id = Input::get('id');
@@ -52,26 +46,19 @@ class PullController extends BaseController {
             $content = Input::get('content');
   
             if (null == $id) {
-                $pull = $this->pull->addPull(array(
-                    'lat'   => $lat,
-                    'lng'   => $lng,
-                    'addr'  => $addr
-                ));
+                $pull = $this->pull->addPull(compact('lat', 'lng', 'addr'));
 
                 $id = $pull->id;
             } 
             
             $this->pull->addConfide($id, $content);
      
-            $pull = $this->pull->findById($id);
+            $pull = $this->pull->findById($id)
+                                ->toArray();
 
-            $responseJson = array(
-                'status'    => 'OK',
-                'message'   => '',
-                'pull'  => $pull->toArray()
-            );  
+            $status = 'OK';
         }
 
-        return $this->json($responseJson);
+        return $this->json(compact('status', 'message', 'pull'));
     }
 }
