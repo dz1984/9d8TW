@@ -1,10 +1,10 @@
 <?php
-use Repository\IPullRepository;
+use Repository\PullRepository;
 
 class PullController extends BaseController {
     private $pullRepository;
 
-    public function __construct(IPullRepository $pullRepository)
+    public function __construct(PullRepository $pullRepository)
     {
         parent::__construct();
         $this->pullRepository = $pullRepository;
@@ -46,25 +46,25 @@ class PullController extends BaseController {
 
         if (Request::ajax())
         {
-            $id = Input::get('id');
+            $pull_id = Input::get('id');
             $lat = Input::get('lat');
             $lng = Input::get('lng');
-            $addr = Input::get('addr');
+            $address = Input::get('addr');
             $content = Input::get('content');
 
-            if (null == $id)
+            if (null == $pull_id)
             {
                 $pull = $this->pullRepository
-                             ->addPull(compact('lat', 'lng', 'addr'));
+                             ->addPull(compact('lat', 'lng', 'address'));
 
-                $id = $pull->id;
+                $pull_id = $pull->id;
             }
 
             $this->pullRepository
-                 ->addConfide($id, $content);
+                 ->addConfide($pull_id, $content);
 
             $pull = $this->pullRepository
-                         ->findById($id)
+                         ->findById($pull_id)
                          ->toArray();
 
             $status = 'OK';
