@@ -10,9 +10,9 @@ class PullRepository {
 		return $pull;
 	}
 
-	public function addConfide($id, $content)
+	public function addConfide($data)
 	{
-		$confide = Confide::post($id, $content);
+		$confide = Confide::post($data);
 
 		return $confide;
 	}

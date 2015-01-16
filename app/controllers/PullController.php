@@ -61,7 +61,7 @@ class PullController extends BaseController {
             }
 
             $this->pullRepository
-                 ->addConfide($pull_id, $content);
+                 ->addConfide(compact('pull_id', 'content'));
 
             $pull = $this->pullRepository
                          ->findById($pull_id)

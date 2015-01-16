@@ -12,8 +12,8 @@ class Confide extends \Eloquent {
         return $this->belongsTo('Pull');
     }
 
-    public static function post($pull_id, $content) {
-        $confide = static::create(compact('pull_id', 'content'));
+    public static function post($data) {
+        $confide = static::create($data);
 
         return $confide;
     }
