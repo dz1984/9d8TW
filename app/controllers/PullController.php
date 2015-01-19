@@ -46,25 +46,8 @@ class PullController extends BaseController {
 
         if (Request::ajax())
         {
-            $pull_id = Input::get('id');
-            $lat = Input::get('lat');
-            $lng = Input::get('lng');
-            $address = Input::get('addr');
-            $content = Input::get('content');
-
-            if (null == $pull_id)
-            {
-                $pull = $this->pullRepository
-                             ->addPull(compact('lat', 'lng', 'address'));
-
-                $pull_id = $pull->id;
-            }
-
-            $this->pullRepository
-                 ->addConfide(compact('pull_id', 'content'));
-
             $pull = $this->pullRepository
-                         ->findById($pull_id)
+                         ->findOrNew(Input::all())
                          ->toArray();
 
             $status = 'OK';

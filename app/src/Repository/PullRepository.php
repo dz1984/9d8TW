@@ -3,37 +3,57 @@
 class PullRepository {
 
 
-	public function addPull($data)
-	{
-		$pull = Pull::post($data);
+  public function findOrNew($data) 
+  {
+    $pull_id = $data['id'];
+    $lat = $data['lat'];
+    $lng = $data['lng'];
+    $address = $data['addr'];
+    $content = $data['content'];
 
-		return $pull;
-	}
+    if (null == $pull_id)
+    {
+      $pull = $this->addPull(compact('lat', 'lng', 'address'));
 
-	public function addConfide($data)
-	{
-		$confide = Confide::post($data);
+      $pull_id = $pull->id;
+    }
 
-		return $confide;
-	}
+    $this->addConfide(compact('pull_id', 'content'));
 
-	public function findAllByBounds($bounds)
-	{
-		list($lat_lo, $lng_lo, $lat_hi, $lng_hi) = explode(',', $bounds);
+    return $this->findById($pull_id);
+  }
 
-		$pulls = Pull::with('confides')
-		              ->whereBetween('lat', array($lat_lo, $lat_hi))
-		              ->whereBetween('lng', array($lng_lo, $lng_hi))
-		              ->get(array('id', 'lat', 'lng', 'address'));
+  public function addPull($data)
+  {
+    $pull = Pull::post($data);
 
-		return $pulls;
-	}
+    return $pull;
+  }
 
-	public function findById($id)
-	{
-		$pull = Pull::find($id, array('id'));
-		$pull->load('confides');
+  public function addConfide($data)
+  {
+    $confide = Confide::post($data);
 
-		return $pull;
-	}
+    return $confide;
+  }
+
+  public function findAllByBounds($bounds)
+  {
+    list($lat_lo, $lng_lo, $lat_hi, $lng_hi) = explode(',', $bounds);
+
+    $pulls = Pull::with('confides')
+                  ->whereBetween('lat', array($lat_lo, $lat_hi))
+                  ->whereBetween('lng', array($lng_lo, $lng_hi))
+                  ->get(array('id', 'lat', 'lng', 'address'));
+
+    return $pulls;
+  }
+
+  public function findById($id)
+  {
+    $pull = Pull::find($id, array('id'));
+    $pull->load('confides');
+
+    return $pull;
+  }
 }
