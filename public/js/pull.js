@@ -32,7 +32,7 @@ var Pull = (function(){
           cancelBtn: '.pull-cancel'
       };
 
-      if (typeof className === 'undefined') {
+      if ($.type(className) === 'undefined') {
           className = defaultClassName;
       }
 
@@ -209,8 +209,10 @@ var Pull = (function(){
   }
 
   Marker.prototype.addClickCallback = function(callback) {
-      // TODO : check the callback type is function
-      this._opts.clickCallback.push(callback);
+      // check the callback type is function
+      if ($.type(callback) === 'function') {
+        this._opts.clickCallback.push(callback);
+      }
   };
 
   Marker.prototype.addDefaultClickCallback = function(panel) {
@@ -274,7 +276,7 @@ var Pull = (function(){
   };
 
   Marker.prototype.placeIt = function(center) {
-      if (typeof center === 'undefined') {
+      if ($.type(center) === 'undefined') {
           center = true;
       }
 
