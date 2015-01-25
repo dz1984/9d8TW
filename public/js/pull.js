@@ -2,11 +2,16 @@ var Pull = (function(){
   'use strict';
   var GEOCODEAPI_URL = 'http://maps.googleapis.com/maps/api/geocode/json';
 
-  var getJsonSync = function(url) {
+  var getJsonSync = function(url, data) {
 
+    if (_.isUndefined(data)) {
+      data = {};
+    }
+    
     var jqxhr = $.ajax({
         type: 'GET',
         url: url,
+        data: data,
         dataType: 'JSON',
         cache: false,
         async: false,
@@ -18,248 +23,97 @@ var Pull = (function(){
     };
   };
 
-  function Panel(className) {
-
-      var _self = this;
-
-      var defaultClassName = {
-          panel: '.cd-panel',
-          title: '.pull-whereis',
-          content: '.pull-content',
-          box: '.pull-box',
-          confides: '.pull-confides',
-          saveBtn:     '.pull-save',
-          cancelBtn: '.pull-cancel'
-      };
-
-      if ($.type(className) === 'undefined') {
-          className = defaultClassName;
+  var Panel = Backbone.View.extend({
+    el: '.cd-panel',
+    events: {
+      "click .pull-save": "save",
+      "click .pull-cancel": "close"
+    },
+    defaults: {
+      fist: null,
+    },
+    template: _.template($("#panel_tpl").html()),
+    initialize: function(options) {
+      if (!_.isUndefined(options)){
+        $.extend({}, this.defaults, options);
       }
-
-      this._className = {};
-
-      $.extend(this._className, defaultClassName, className);
-
-      this._jqPanel = $(this._className.panel);
-      this._jqTitle = $(this._className.title);
-      this._jqContent = $(this._className.content);
-      this._jqBox = $(this._className.box);
-      this._jqConfides = $(this._className.confides);
-      this._jqSaveBtn = $(this._className.saveBtn);
-      this._jqCancelBtn = $(this._className.cancelBtn);
-
-      this._marker = null;
-
-      this._jqSaveBtn.on('click', function() {
-        _self.save();
-      });
-
-      this._jqCancelBtn.on('click', function(){
-        _self.close();
-      });
-
-      // private method
-      this._init = function(marker) {
-          this._marker = marker;
-
-          var _self = this;
-          var content = this._marker.getContent();
-          var addr = this._marker.getAddress();
-          var confides = this._marker.getConfides();
-
-          if (null !== content) {
-              this._setContent(content);
-          }
-
-          if (null !== addr ) {
-              this._setTitle(addr);
-          }
-
-          if (null !== confides) {
-              this._setConfides(confides);
-          }
-
-      };
-
-      this._reset = function() {
-          this._marker = null;
-          this._setTitle('');
-          this._clearContent();
-          this._clearConfides();
-      };
-
-      this._save = function(saveData) {
-          var jqxhr = $.ajax({
-              type: 'GET',
-              url: 'pull/add',
-              data: saveData,
-              dataType: 'JSON',
-              cache: false,
-              async: false,
-          });
-
-          return {
-              valid: jqxhr.statusText,
-              data: jqxhr.responseJSON
-          };
-      };
-
-      this._setTitle = function(addr) {
-          this._jqTitle.text(addr);
-       };
-
-      this._clearContent = function() {
-          this._setContent('');
-      };
-
-      this._setContent = function(content) {
-          this._jqContent.val(content);
-      };
-
-      this._getContent = function() {
-          var content = $.trim(this._jqContent.val());
-
-          return content;
-      };
-
-      this._setConfides = function(confides) {
-          this._clearConfides();
-          
-          var jqConfides = this._jqConfides;
-
-          confides.forEach(function(confide){
-              var content = confide.content;
-              var jqBlockquote = $("<blockquote>").text(content);
-              var jqConfide = $("<div>")
-                                  .addClass('well well-sm')
-                                  .append(jqBlockquote);
-
-              jqConfides.append(jqConfide);
-          });
-      };
-
-      this._clearConfides = function() {
-          this._jqConfides.text('');
-      };
-
-  }
-
-  Panel.prototype.open = function(marker) {
-      this._init(marker);
-      this._jqPanel.addClass('is-visible');
-  };
-
-  Panel.prototype.close = function() {
+    },
+    _init: function(fist) {
+      this.model = fist;
+    },
+    _reset: function(){
+      this.model = null;
+    },
+    open: function(fist) {
+      this._init(fist);
+      this.$el.addClass('is-visible');
+      this.render();
+    },
+    close: function() {
       this._reset();
-      this._jqPanel.removeClass('is-visible');
-  };
-
-  Panel.prototype.save = function() {
-      var _self = this;
-      
-      var markerId = this._marker.getId();
-      var content = this._getContent();
-      var markerAddr = this._marker.getAddress();
-      var markerLatLng = this._marker.getLatLng();
+      this.$el.removeClass('is-visible');
+    },
+    save: function() {
+      var id = this.model.get('id');
+      var content = this.$el.find('.pull-content').val();
+      var address = this.model.get('address');
+      var latLng = this.model.get('latLng');
 
       var saveData = {
-          id: markerId,
-          lat: markerLatLng.lat(),
-          lng: markerLatLng.lng(),
-          addr: markerAddr,
+          id: id,
+          lat: latLng.lat(),
+          lng: latLng.lng(),
+          address: address,
           content: content
       };
 
       // insert new pull record.
-      var reply = this._save(saveData);
+      var reply = getJsonSync('pull/add', saveData);
 
       if ('OK' === reply.valid && 'OK' === reply.data.status) {
 
           var id = reply.data.pull.id;
           var confides = reply.data.pull.confides;
 
-          this._marker.setId(id);
-          this._marker.setConfides(confides);
+          this.model.set({id:id});
+          this.model.set({confides:confides});
 
-          this._marker.addDefaultClickCallback(this);
+          this.model.addDefaultClickCallback(this);
 
           // place marker if save success
-          this._marker.placeIt();
+          this.model.place();
       }
 
       this.close();
-  };
+    },
+    render: function() {
+      this.$el.html(this.template(this.model.attributes));
+    }
+  });
 
-  function Marker(opts) {
-    var defaultOpt = {
-        map: null,
-        latLng: null,
-        id: null,
-        addr: null,
-        content: null,
-        marker: null,
-        confides: null,
-        clickCallback: []
-    };
-
-    this._opts = {};
-
-    $.extend(this._opts,defaultOpt, opts);
-
-  }
-
-  Marker.prototype.addClickCallback = function(callback) {
-      // check the callback type is function
-      if ($.type(callback) === 'function') {
-        this._opts.clickCallback.push(callback);
+  var Fist = Backbone.Model.extend({
+    defaults: {
+      map: null,
+      latLng: null,
+      id: null,
+      address: null,
+      content: null,
+      marker: null,
+      confides: [],
+      clickCallback: []
+    },
+    initialize: function(options) {
+      if (!_.isUndefined(options)) {
+        $.extend({}, this.defaults, options);
       }
-  };
-
-  Marker.prototype.addDefaultClickCallback = function(panel) {
-      // TODO : check the panel type
-      this.addClickCallback(function() {
-          panel.open(this);
-      });
-  };
-
-  Marker.prototype.getLatLng = function() {
-      return this._opts.latLng;
-  };
-
-  Marker.prototype.setId = function(id) {
-      this._opts.id = id;
-  };
-
-  Marker.prototype.getId = function() {
-      return this._opts.id;
-  };
-
-  Marker.prototype.setContent = function(content) {
-      this._opts.content = content;
-  };
-
-  Marker.prototype.getContent = function() {
-      return this._opts.content;
-  };
-
-  Marker.prototype.getConfides = function() {
-      return this._opts.confides;
-  };
-
-  Marker.prototype.setConfides = function(confides) {
-      this._opts.confides = confides;
-  };
-
-  Marker.prototype.setAddress = function(addr) {
-      this._opts.addr = addr;
-  };
-
-  Marker.prototype.getAddress = function() {
-      if (this._opts.addr !== null) {
-          return this._opts.addr;
+      
+      if (_.isNull(this.get('address')) && !_.isNull(this.get('latLng'))) {
+        var address = this._findoutAddress(this.get('latLng'));
+        this.set({address: address});
       }
-
-      var strLocation = this._opts.latLng.toUrlValue();
+    },
+    _findoutAddress: function(latLng) {
+      var strLocation = latLng.toUrlValue();
       var param = $.param({
           'latlng': strLocation,
           'components': 'route'
@@ -267,22 +121,34 @@ var Pull = (function(){
 
       var apiUrl = GEOCODEAPI_URL + '?' + param;
       var reply = getJsonSync(apiUrl);
+      var address = null;
 
       if (reply.valid == 'OK' && reply.data.status == 'OK') {
-          this._opts.addr = reply.data.results[0].formatted_address;
+          address = reply.data.results[0].formatted_address;
       } 
 
-      return (null === this._opts.addr)?'不知名地方':this._opts.addr;
-  };
-
-  Marker.prototype.placeIt = function(center) {
-      if ($.type(center) === 'undefined') {
-          center = true;
+      return _.isNull(address)?'不知名地方':address;
+    },
+    addClickCallback: function(callback) {
+      // check the callback type is function
+      if (_.isFunction(callback)) {
+        this.get('clickCallback').push(callback);
+      }
+    },
+    addDefaultClickCallback: function(panel){
+      // TODO : check the panel type
+      this.addClickCallback(function() {
+          panel.open(this);
+      });
+    },
+    place: function(center) {
+      if (_.isUndefined(center)) {
+        center = false;
       }
 
       var markerOptions = {
-        position: this._opts.latLng,
-        map: this._opts.map,
+        position: this.get('latLng'),
+        map: this.get('map'),
         icon: {
           url: 'images/fist-icon.png',
           scaledSize: new google.maps.Size(20, 20),
@@ -290,7 +156,7 @@ var Pull = (function(){
         }
       };
 
-      this._opts.marker = new google.maps.Marker(markerOptions);
+      this.set({marker: new google.maps.Marker(markerOptions)});
 
       // marker event handler
       (function(obj, id, marker, callbackList) {
@@ -299,16 +165,17 @@ var Pull = (function(){
                   callback.bind(obj, event)();
               });
           });
-      })(this, this._opts.id, this._opts.marker, this._opts.clickCallback);
+      })(this, this.get('id'), this.get('marker'), this.get('clickCallback'));
 
       if (true === center){
-          this._opts.map.setCenter(this._opts.latLng);
+          this.get('map').setCenter(this.get('latLng'));
       }
-  };
-    
+    }
+  });
+
   return {
     'Panel' : Panel,
-    'Marker': Marker
+    'Fist': Fist
   };
 
 })();

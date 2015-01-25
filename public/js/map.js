@@ -35,19 +35,19 @@
 
                         pullJsonList.forEach(function(pullJson){
            
-                            var marker = new Pull.Marker(
+                            var fist = new Pull.Fist(
                                 {
                                     map: map, 
                                     latLng: new google.maps.LatLng(pullJson.lat, pullJson.lng),
                                     id: pullJson.id,
-                                    addr:  pullJson.address,
+                                    address:  pullJson.address,
                                     confides: pullJson.confides,               
                                 }
                             );
 
-                            marker.addDefaultClickCallback(panel);
+                            fist.addDefaultClickCallback(panel);
                             
-                            marker.placeIt(false);
+                            fist.place(false);
                         });
                 } // end success
             }
@@ -87,9 +87,9 @@
     });
 
     google.maps.event.addListener(map, 'click', function(event) {
-        var newPullMarker = new Pull.Marker({map: map, latLng: event.latLng});
+        var newFist = new Pull.Fist({map: map, latLng: event.latLng});
 
-        panel.open(newPullMarker);
+        panel.open(newFist);
     });
 
     google.maps.event.addListener(map, 'dragend', function() {

@@ -8,7 +8,7 @@ class PullRepository {
     $pull_id = $data['id'];
     $lat = $data['lat'];
     $lng = $data['lng'];
-    $address = $data['addr'];
+    $address = $data['address'];
     $content = $data['content'];
 
     if (null == $pull_id)
