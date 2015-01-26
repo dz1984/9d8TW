@@ -37,7 +37,12 @@
       <div class='pull-confides-box'>
         <div class='pull-confides'>
           <% _.each(confides, function(confide){ %>
-          <div class='well well-sm'><blockquote><%= confide.content %></blockquote></div>
+          <div class='well well-sm'>
+            <p class='text-right'>
+              <time is="relative-time" datetime="<%= confide.created_at %>"></time>
+            </p>
+            <blockquote><%= confide.content %></blockquote>
+          </div>
           <% }); %>
         </div>
       </div> <!-- pull-confides -->
@@ -46,6 +51,10 @@
 </script>
 
 {{ HTML::script('https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places') }}
+{{ HTML::script('js/libs/underscore-min.js') }}
+{{ HTML::script('js/libs/backbone-min.js') }}
+{{ HTML::script('js/libs/polymer-0.5.2.min.js') }}
+{{ HTML::script('js/libs/time-elements.js') }}
 {{ HTML::script('js/pull.js') }}
 {{ HTML::script('js/map.js') }}
 @stop

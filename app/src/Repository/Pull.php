@@ -10,7 +10,7 @@ class Pull extends \Eloquent {
 
     public function confides() {
         return $this->hasMany("Repository\\Confide")
-            ->select(array('pull_id','content'));
+            ->select(array('pull_id','content','created_at'));
     }
 
     public static function post($data) {

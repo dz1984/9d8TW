@@ -59,6 +59,12 @@ var Pull = (function(){
       var address = this.model.get('address');
       var latLng = this.model.get('latLng');
 
+      if ('' === $.trim(content)) {
+        // TODO : show the notice message.
+        this.close();
+        return false;
+      }
+
       var saveData = {
           id: id,
           lat: latLng.lat(),
