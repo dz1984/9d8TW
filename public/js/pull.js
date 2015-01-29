@@ -29,9 +29,7 @@ var Pull = (function(){
       "click .pull-save": "save",
       "click .pull-cancel": "close"
     },
-    defaults: {
-      fist: null,
-    },
+    model: null,
     template: _.template($("#panel_tpl").html()),
     initialize: function(options) {
       if (!_.isUndefined(options)){
@@ -81,8 +79,7 @@ var Pull = (function(){
           var id = reply.data.pull.id;
           var confides = reply.data.pull.confides;
 
-          this.model.set({id:id});
-          this.model.set({confides:confides});
+          this.model.set({id:id, confides:confides});
 
           this.model.addDefaultClickCallback(this);
 
@@ -103,7 +100,6 @@ var Pull = (function(){
       latLng: null,
       id: null,
       address: null,
-      content: null,
       marker: null,
       confides: [],
       clickCallback: []
@@ -113,10 +109,13 @@ var Pull = (function(){
         $.extend({}, this.defaults, options);
       }
       
-      if (_.isNull(this.get('address')) && !_.isNull(this.get('latLng'))) {
+      if (this._isNeedToFindAddress()) {
         var address = this._findoutAddress(this.get('latLng'));
         this.set({address: address});
       }
+    },
+    _isNeedToFindAddress: function() {
+      return _.isNull(this.get('address')) && !_.isNull(this.get('latLng'));
     },
     _findoutAddress: function(latLng) {
       var strLocation = latLng.toUrlValue();
