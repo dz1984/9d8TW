@@ -41,7 +41,7 @@
                                     latLng: new google.maps.LatLng(pullJson.lat, pullJson.lng),
                                     id: pullJson.id,
                                     address:  pullJson.address,
-                                    confides: pullJson.confides,               
+                                    confides: pullJson.confides
                                 }
                             );
 

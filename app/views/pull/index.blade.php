@@ -53,6 +53,7 @@
 {{ HTML::script('https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places') }}
 {{ HTML::script('js/libs/underscore-min.js') }}
 {{ HTML::script('js/libs/backbone-min.js') }}
+{{ HTML::script('js/libs/webcomponents.min.js') }}
 {{ HTML::script('js/libs/polymer-0.5.2.min.js') }}
 {{ HTML::script('js/libs/time-elements.js') }}
 {{ HTML::script('js/pull.js') }}

@@ -57,7 +57,7 @@ var Pull = (function(){
       var address = this.model.get('address');
       var latLng = this.model.get('latLng');
 
-      if ('' === $.trim(content)) {
+      if (_.isEmpty(content)) {
         // TODO : show the notice message.
         this.close();
         return false;
